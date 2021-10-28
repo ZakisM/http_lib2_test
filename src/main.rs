@@ -58,7 +58,7 @@ fn handle_connection(stream: std::result::Result<TcpStream, std::io::Error>) -> 
             }
         }
 
-        thread::sleep(Duration::from_millis(50));
+        thread::sleep(Duration::from_millis(10));
     }
 
     Ok(())
