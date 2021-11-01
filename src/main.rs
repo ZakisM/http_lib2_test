@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use http_lib2::header_item::HeaderItem;
 use http_lib2::http_item::HttpItem;
+use http_lib2::pool::ThreadPool;
 use http_lib2::request::Request;
 use http_lib2::response::ResponseBuilder;
 
@@ -13,8 +14,10 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 fn main() -> Result<()> {
     let listener = TcpListener::bind("127.0.0.1:1234")?;
 
+    let mut pool = ThreadPool::new(16);
+
     for stream in listener.incoming() {
-        thread::spawn(move || {
+        pool.spawn(move || {
             if let Err(e) = handle_connection(stream) {
                 eprintln!("{}", e);
             }
@@ -42,7 +45,7 @@ fn handle_connection(stream: std::result::Result<TcpStream, std::io::Error>) -> 
             Ok(request) => {
                 let req_headers = request.header.header_map();
 
-                let response = ResponseBuilder::new().body(b"Hello Zak!").build();
+                let response = ResponseBuilder::new().build();
 
                 response.write_to(res_buf.by_ref())?;
 
