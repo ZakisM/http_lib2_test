@@ -44,7 +44,7 @@ fn handle_connection(stream: std::result::Result<TcpStream, std::io::Error>) -> 
     loop {
         match Request::from_stream(req_buf.by_ref()) {
             Ok(_) => {
-                let response = ResponseBuilder::new().body(b"Hello World!").build();
+                let response = ResponseBuilder::new().build();
 
                 response.write_to(res_buf.by_ref())?;
             }
