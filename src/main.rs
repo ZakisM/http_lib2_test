@@ -4,13 +4,14 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::time::Duration;
 
-use http_lib2::header_item::HeaderItem;
+use http_lib2::error::HttpError;
 use http_lib2::http_item::HttpItem;
 use http_lib2::pool::ThreadPool;
 use http_lib2::request::Request;
 use http_lib2::response::ResponseBuilder;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
+
 fn main() -> Result<()> {
     let listener = TcpListener::bind("127.0.0.1:1234")?;
 
@@ -42,26 +43,20 @@ fn handle_connection(stream: std::result::Result<TcpStream, std::io::Error>) -> 
 
     loop {
         match Request::from_stream(req_buf.by_ref()) {
-            Ok(request) => {
-                let req_headers = request.header.header_map();
-
-                let response = ResponseBuilder::new().build();
+            Ok(_) => {
+                let response = ResponseBuilder::new().body(b"Hello World!").build();
 
                 response.write_to(res_buf.by_ref())?;
-
-                if !req_headers.contains_by_str_key_value("connection", "keep-alive")
-                    || req_headers.contains_by_str_key_value("connection", "close")
-                {
+            }
+            Err(e) => {
+                if e != HttpError::DataTimeout {
+                    eprintln!("{}", e);
                     break;
                 }
             }
-            Err(e) => {
-                eprintln!("{}", e);
-                break;
-            }
         }
 
-        thread::sleep(Duration::from_millis(10));
+        thread::sleep(Duration::from_nanos(100));
     }
 
     Ok(())
