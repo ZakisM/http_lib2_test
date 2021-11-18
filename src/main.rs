@@ -8,6 +8,7 @@ fn main() -> Result<()> {
 
     server.at("/").get(hello_world);
     server.at("/vec_u8").get(vec_u8);
+    server.at("/hello").get(hello);
     server.at("/hello/{name}").get(hello_name);
     server.at("/hello/{name}/{age}").get(hello_name_age);
     server
@@ -29,8 +30,12 @@ fn vec_u8(_: ServerRequest) -> impl HttpResponse {
     hello_world_bytes.to_vec()
 }
 
+fn hello(_: ServerRequest) -> impl HttpResponse {
+    "Hello!"
+}
+
 fn hello_name(req: ServerRequest) -> impl HttpResponse {
-    let name = req.path("name")?;
+    let name: String = req.path("name")?;
 
     let res = format!("Hello {}!", name);
 
@@ -38,8 +43,8 @@ fn hello_name(req: ServerRequest) -> impl HttpResponse {
 }
 
 fn hello_name_age(req: ServerRequest) -> impl HttpResponse {
-    let name = req.path("name")?;
-    let age = req.path("age")?;
+    let name: String = req.path("name")?;
+    let age: u8 = req.path("age")?;
 
     let res = format!("Hello {}, aged {}!", name, age);
 
@@ -47,8 +52,8 @@ fn hello_name_age(req: ServerRequest) -> impl HttpResponse {
 }
 
 fn hello_name_test_age(req: ServerRequest) -> impl HttpResponse {
-    let name = req.path("name")?;
-    let age = req.path("age")?;
+    let name: String = req.path("name")?;
+    let age: u8 = req.path("age")?;
 
     let res = format!("[Test] Hello {}, aged {}!", name, age);
 
